@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+    <script type="text/javascript" th:inline="javascript">
+        /*<![CDATA[*/
+        var ctxPath = /*[[@{/}]]*/ '';
+        /*]]>*/
+    </script>
+
+    <!-- 引入layui样式 -->
+    <link rel="stylesheet" th:href="${#httpServletRequest.getContextPath()} + '/layui/css/layui.css'">
+    <!-- 引入jquery资源库 -->
+    <script type="text/javascript" th:src="${#httpServletRequest.getContextPath()} + '/jq/jquery.min.js'"></script>
+    <!-- 引入layui资源库 -->
+    <script type="text/javascript" th:src="${#httpServletRequest.getContextPath()} + '/layui/layui.all.js'"></script>
+
+<body  style="padding: 200px">
+
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+    <legend>登陆</legend>
+</fieldset>
+
+    <div style="padding: 20px; background-color: #F2F2F2;">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <!--<div class="layui-card-header">卡片面板</div>-->
+                    <div class="layui-card-body">
+                        <form class="layui-form layui-form-pane">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">用户名</label>
+                                <div class="layui-input-inline">
+                                    <input id="login_user_account" type="text" name="title" autocomplete="off" placeholder="请输入用户名" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">密码</label>
+                                <div class="layui-input-inline">
+                                    <input id="login_user_pwd" type="password" name="title" autocomplete="off" placeholder="请输入密码" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">验证码</label>
+                                <div class="layui-input-inline">
+                                    <input id="login_user_imgcode" type="text" name="title" autocomplete="off" placeholder="请输入验证码" class="layui-input">
+                                </div>
+                                <div class="layui-input-inline">
+                                    <span onclick="dianji_img_code()">
+                                        <img id="login_img_code" th:src="${#httpServletRequest.getContextPath()} + '/imgcode'">
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <a href="javascript:login()" class="layui-btn">
+                                <i class="layui-icon layui-icon-face-smile-fine" style="font-size: 25px; color: #f6f6f6;"></i>
+                                登录</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        //登录
+        function login() {
+            $.ajax({
+                url:ctxPath + "/login",
+                data:{userAccount:$("#login_user_account").val(),
+                    userPwd:$("#login_user_pwd").val(),
+                    userImgCode:$("#login_user_imgcode").val()},
+                success:function(data) {
+                    //判断登录结果
+                    if(null != data && 1 == data.code) {
+                        //登录成功，跳转到index主页
+                        location.href= ctxPath + "/index";
+                    } else if(null != data && 2 == data.code) {
+                        layer.alert("请输入正确的验证码！")
+                        //并且重新刷新验证码
+                        var time = new Date().getTime();
+                        $("#login_img_code").attr("src",ctxPath + "/imgcode?time=" + time)
+                    } else {
+                        layer.alert("用户名或密码错误！")
+                        //并且重新刷新验证码
+                        var time = new Date().getTime();
+                        $("#login_img_code").attr("src",ctxPath + "/imgcode?time=" + time)
+                    }
+                }
+            });
+        }
+
+        //图片验证码点击换一张
+        function dianji_img_code() {
+            //new一个时间戳，用于每次刷新的请求不一样
+            var time = new Date().getTime();
+            $("#login_img_code").attr("src",ctxPath + "/imgcode?time=" + time)
+        }
+
+    </script>
+</body>
+</html>

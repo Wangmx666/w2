@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <!-- 工具栏按钮容器 -->
+    <div id="book_toolbar" class="toolbar_div_yincang">
+        <span shiro:hasAnyPermissions="/book/insert">
+            <button class="layui-btn" onClick="book_add_button()">新增</button>
+        </span>
+        <span shiro:hasAnyPermissions="/book/deletes">
+            <button class="layui-btn" onClick="book_delete_button()">删除</button>
+        </span>
+
+    </div>
+
+    <!-- 操作列按钮容器 -->
+    <div id="book_update_button" class="toolbar_div_yincang">
+        <a class="layui-btn layui-btn-xs" lay-event="dianji">编辑</a>
+    </div>
+    <!-- 表格容器 -->
+    <table id="book_tb" lay-filter="book_tb_f"></table>
+
+    <script type="text/javascript" th:inline="javascript">
+        /*<![CDATA[*/
+        var ctxPath = /*[[@{/}]]*/ '';
+        /*]]>*/
+    </script>
+
+    <script th:inline="none">
+        //从layui中获取table组件
+        var table = layui.table;
+        //渲染数据列表
+        var book_list_table = table.render({
+            //初始化位置
+            elem:'#book_tb',
+            //开启分页
+            page:true,
+            //每页条数
+            limits:[5,10],
+            //每页默认条数
+            limit:5,
+            //请求查询数据
+            url: ctxPath + '/book/select',
+            //表格
+            cols:[[
+                //开启复选框
+                {type:'checkbox'},
+                //表头
+                {field:'bookID',title:'序号',width:'80',sort:true},
+                {field:'bookName',title:'书籍名称',width:'100'},
+                {field:'bookAuthor',title:'书籍作者',width:'100'},
+                {field:'bookType',title:'书籍类型',width:'100',templet:function(a) {
+                        var type_zhanshi = "";
+                        if (0 == a.bookType) {
+                            type_zhanshi = "武侠";
+                        } else if (1 == a.bookType) {
+                            type_zhanshi = "科幻";
+                        } else if (2 == a.bookType) {
+                            type_zhanshi = "盗墓";
+                        }
+                        return type_zhanshi;
+                    }},
+                {field:'bookPrice',title:'书籍价格',width:'100'},
+                {field:'bookDesc',title:'书籍描述',width:'100'},
+                {field:'bookDate',title:'发布日期',width:'130'},
+                {fixed:'right',title:'操作',width:'80',toolbar:'#book_update_button'}
+            ]],toolbar:"#book_toolbar"
+        });
+
+        //配置数据表格的监听
+        table.on("tool(book_tb_f)", function(obj) {
+            //获取监听到的一行的数据
+            var data = obj.data;
+            //监听到 编辑 按钮被点击
+            if ("dianji" == obj.event) {
+                //打开编辑对话框
+                book_update(data.bookID);
+            }
+        });
+
+        //修改数据
+        function book_update(book_id) {
+            $.ajax({
+                url:ctxPath + "/book/dantiao",
+                data:{bookID:book_id},
+                success:function(data) {
+                    //打开编辑对话框
+                    var layer = layui.layer;
+                    var book_update_layer = layer.open({
+                        type:1,
+                        title:"编辑书籍",
+                        content:data,
+                        area:["680px","580px"],
+                        //动画
+                        anim:3,
+                        maxmin:true,
+                        btn:["提交"],
+                        yes:function(data) {
+                            //把数据提交到后台
+                            $.ajax({
+                                url:ctxPath + "/book/update",
+                                data:$("#book_update_form").serialize(),
+                                success:function(data) {
+                                    //关闭对话框
+                                    layer.close(book_update_layer);
+                                    //刷新列表
+                                    book_list_table.reload();
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        //删除数据
+        function book_delete_button() {
+            //获取到所有被选中的数据
+            var xuanzhong = table.checkStatus("book_tb");
+            //判断是否选中数据
+            if(0 == xuanzhong.data) {
+                //没选中提示
+                layer.msg('请至少选择一项', {icon: 2});
+            } else {
+                //选中删除
+                layer.confirm('确定删除吗?', {icon: 3, title:'提示'}, function(index){
+                    //获取选中数据的所有ID
+                    var book_ids = "";
+                    for (var i = 0; i < xuanzhong.data.length; i++) {
+                        book_ids = book_ids + "," + xuanzhong.data[i].bookID;
+                    }
+                    //截取把第一个','截掉
+                    book_ids = book_ids.substring(1);
+                    //ajax实现批量删除
+                    $.ajax({
+                        url:ctxPath + "/book/deletes",
+                        data:{bookIDS:book_ids},
+                        type:"post",
+                        success:function(data) {
+                            //刷新表格
+                            book_list_table.reload();
+                        }
+                    });
+                    //取消不执行
+                    layer.close(index);
+                });
+            }
+        };
+
+        //新增数据
+        //打开添加书籍页面
+        function book_add_button() {
+            //发起ajax请求，获取添加页面
+            $.ajax ({
+                url:ctxPath + "/book/toAdd",
+                success:function(data) {
+                    //获取对话框组件
+                    var layer = layui.layer;
+                    var book_add_layer = layer.open({
+                        //对话框类型
+                        type:1,
+                        title:"新增数据",
+                        //对话框内容
+                        content:data,
+                        //对话框大小
+                        area:["680px","500px"],
+                        anim:4,
+                        //对话框最小化/最大化
+                        maxmin:true,
+                        btn:["重置","提交"],
+                        btn2:function() {
+                            //把数据提交到后台
+                            $.ajax({
+                                url:ctxPath + "/book/insert",
+                                data:$("#book_add_form").serialize(),
+                                success:function(data) {
+                                    //关闭对话框
+                                    layer.close(book_add_layer);
+                                    //刷新列表
+                                    book_list_table.reload();
+                                }
+                            });
+                        },
+                        yes:function() {
+                            alert("无法重置")
+                        },
+                        skin:"layui-layer-lan"
+                    });
+                }
+            });
+        };
+    </script>
+
+
+</body>
+</html>

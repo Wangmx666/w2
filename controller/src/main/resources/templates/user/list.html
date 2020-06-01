@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+    <!-- 表格容器 -->
+    <table id="user_tb"></table>
+
+    <script type="text/javascript" th:inline="javascript">
+        /*<![CDATA[*/
+        var ctxPath = /*[[@{/}]]*/ '';
+        /*]]>*/
+    </script>
+
+    <script th:inline="none">
+        //初始化角色列表
+        var table = layui.table;
+        //初始化数据表格
+        var user_list_table = table.render({
+            elem: '#user_tb'
+            ,page:true
+            ,limits:[5,10]
+            ,limit:5
+            ,url: ctxPath + '/user/select' //查询数据
+            ,cols: [[ //表头
+                {type:'checkbox'}//开启复选框
+                ,{field: 'userID', title: '序号', width:80, sort: true}
+                ,{field: 'userAccount', title: '用户名',width:140}
+                ,{field: 'userPwd', title: '密码',width:140}
+                ,{fixed: 'right', title: '操作',width:140}
+            ]]
+        });
+    </script>
+
+</body>
+</html>

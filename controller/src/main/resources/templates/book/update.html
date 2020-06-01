@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form id="book_update_form" class="layui-form" style="padding:10px">
+        <input type="hidden" name="bookID" th:value="${dantiao.bookID}">
+        <div class="layui-form-item">
+            <div class="layui-form-label">书籍名称</div>
+            <div class="layui-input-block">
+                <input name="bookName" autocomplete="off" placeholder="请输入" class="layui-input" th:value="${dantiao.bookName}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-form-label">书籍作者</div>
+            <div class="layui-input-block">
+                <input name="bookAuthor" autocomplete="off" placeholder="请输入" class="layui-input" th:value="${dantiao.bookAuthor}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-form-label">书籍类别</div>
+            <div class="layui-input-block">
+                <input type="radio" name="bookType" value="0" title="武侠" th:checked="${book.bookType==0} ? 'checked'">
+                <input type="radio" name="bookType" value="1" title="科幻" th:checked="${book.bookType==1} ? 'checked'">
+                <input type="radio" name="bookType" value="2" title="盗墓" th:checked="${book.bookType==2} ? 'checked'">
+    </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-form-label">书籍价格</div>
+        <div class="layui-input-block">
+            <input name="bookPrice" autocomplete="off" placeholder="￥" class="layui-input" style="width:100px;" th:value="${dantiao.bookPrice}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-form-label">书籍描述</div>
+        <div class="layui-input-block">
+            <textarea name="bookDesc" placeholder="请输入" class="layui-textarea" th:text="${dantiao.bookDesc}"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-form-label">日期</div>
+        <div class="layui-input-block">
+            <input name="bookDate" id="book_date" autocomplete="off" class="layui-input" th:value="${dantiao.bookDate}">
+        </div>
+    </div>
+    </form>
+
+    <script>
+        //获取form组件
+        var book_add_form = layui.form;
+        //获取日期组件
+        var book_add_date = layui.laydate;
+        //渲染form样式
+        book_add_form.render();
+        //渲染日期
+        book_add_date.render({
+            elem:"#book_date",
+            trigger:'click'//解决日期点击闪退问题
+        });
+    </script>
+
+
+</body>
+</html>
